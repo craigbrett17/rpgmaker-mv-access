@@ -30,6 +30,7 @@
 
     function sanitizeForScreenReader(text) {
         var characterRegex = /<(\\c\[\d+\])?(\w+)>/g;
+        var colourOnlyRegex = /\\c\[\d+\](\w+)\\c/g;
         var playerRegex = /<(\\c\[\d+\])?\\N\[1\]>/g;
         var escapeSequencesRegex = /\\[nr]/g;
         var nonTextRegex = /[^\w.,?!':_ -]+/g;
@@ -40,6 +41,7 @@
             .replace("<br>", " ")
             .replace("<BR>", " ")
             .replace(characterRegex, "$2: ")
+            .replace(colourOnlyRegex, "$1")
             .replace(playerRegex, "Me: ")
             .replace(escapeSequencesRegex, " ")
             .replace(nonTextRegex, " ");
