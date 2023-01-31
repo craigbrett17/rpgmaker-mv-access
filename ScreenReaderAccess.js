@@ -56,7 +56,8 @@
     var originalMessageAdd = Game_Message.prototype.add;
     Game_Message.prototype.add = function(text) {
         originalMessageAdd.call(this, text);
-        setTextTo(text);
+        var allText = this.allText();
+        setTextTo(allText);
     }
 
     var originalCommandSelect = Window_Command.prototype.select;
