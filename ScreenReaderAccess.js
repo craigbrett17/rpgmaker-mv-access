@@ -75,6 +75,12 @@
         }
     }
 
+    var originalBattleLogAddText = Window_BattleLog.prototype.addText;
+    Window_BattleLog.prototype.addText = function(text) {
+        originalBattleLogAddText.call(this, text);
+        setTextTo(text);
+    }
+
     // actually add the sr-only element to the game document
 
     if (document) {
