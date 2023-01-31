@@ -80,6 +80,16 @@
         }
     }
 
+    var originalOptionsSelect = Window_Options.prototype.select;
+    Window_Options.prototype.select = function(index) {
+        originalOptionsSelect.call(this, index);
+        var command = this.currentData();
+        if (command) {
+            var optionText = `${this.commandName(index)}: ${this.statusText(index)}`;
+            setTextTo(optionText);
+        }
+    }
+
     var originalBattleLogAddText = Window_BattleLog.prototype.addText;
     Window_BattleLog.prototype.addText = function(text) {
         originalBattleLogAddText.call(this, text);
