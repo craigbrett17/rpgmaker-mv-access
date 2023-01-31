@@ -5,6 +5,25 @@
  */
 
 (function() {
+    // nice easy way to specify the css
+    var srOnlyCss = `position: absolute; 
+        width: 1px; 
+        height: 1px; 
+        position: absolute; 
+        padding: 0; 
+        margin: -1px; 
+        overflow: hidden; 
+        border: 0;`;
+
+    function createSrElement() {
+        var srOnlyElement = document.createElement('div');
+        srOnlyElement.id = "sr-only";
+        srOnlyElement.setAttribute('aria-live', 'polite');
+        srOnlyElement.setAttribute('aria-atomic', 'true');
+        srOnlyElement.setAttribute('style', srOnlyCss);
+        document.body.appendChild(srOnlyElement);
+    }
+
     function getSrElement() {
         return document.getElementById('sr-only');
     }
@@ -36,5 +55,13 @@
     Game_Message.prototype.add = function(text) {
         originalAdd.call(this, text);
         setTextTo(text);
+    }
+
+    // actually add the sr-only element to the game document
+
+    if (document) {
+        createSrElement();
+    } else {
+        console.log("Unable to create sr-only element: Cannot find document.");
     }
 })();
