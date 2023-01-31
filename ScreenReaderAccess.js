@@ -51,10 +51,19 @@
 
     // attempted core engine overrides
 
-    var originalAdd = Game_Message.prototype.add;
+    var originalMessageAdd = Game_Message.prototype.add;
     Game_Message.prototype.add = function(text) {
-        originalAdd.call(this, text);
+        originalMessageAdd.call(this, text);
         setTextTo(text);
+    }
+
+    var originalSelect = Window_Command.prototype.select;
+    Window_Command.prototype.select = function(index) {
+        originalSelect.call(this, index);
+        var command = this.currentData();
+        if (command) {
+            setTextTo(command.name);
+        }
     }
 
     // actually add the sr-only element to the game document
