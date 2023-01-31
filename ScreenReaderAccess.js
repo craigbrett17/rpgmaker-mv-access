@@ -57,12 +57,21 @@
         setTextTo(text);
     }
 
-    var originalSelect = Window_Command.prototype.select;
+    var originalCommandSelect = Window_Command.prototype.select;
     Window_Command.prototype.select = function(index) {
-        originalSelect.call(this, index);
+        originalCommandSelect.call(this, index);
         var command = this.currentData();
         if (command) {
             setTextTo(command.name);
+        }
+    }
+
+    var originalSkillListSelect = Window_SkillList.prototype.select;
+    Window_SkillList.prototype.select = function(index) {
+        originalSkillListSelect.call(this, index);
+        var item = this.item();
+        if (item) {
+            setTextTo(item.name + ": " + item.description);
         }
     }
 
