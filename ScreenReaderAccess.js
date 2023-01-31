@@ -33,7 +33,7 @@
         var colourOnlyRegex = /\\c\[\d+\](\w+)\\c/g;
         var playerRegex = /<(\\c\[\d+\])?\\N\[1\]>/g;
         var escapeSequencesRegex = /\\[nr]/g;
-        var nonTextRegex = /[^\w.,?!':_ -]+/g;
+        var nonTextRegex = /[^\w.,?!':_%*+ -]+/g;
         return text
             .replace("<WordWrap>", " ")
             .replace("<SIMPLE>", " ")
