@@ -29,37 +29,52 @@
     }
 
     function sanitizeForScreenReader(text) {
-        var characterRegex = /<(\\c\[\d+\])?(\w+)>/g;
-        var colourOnlyRegex = /\\c\[\d+\](\w+)\\c/g;
-        var playerRegex = /<(\\c\[\d+\])?\\N\[1\]>/g;
-        var escapeSequencesRegex = /\\[nr]/g;
-        var nonTextRegex = /[^\w.,?!':_%*+ -]+/g;
+        const colourOnlyRegex = /\\*c\[\d+\]/g;
+        const displayCharactersRegex = /[\{\}^]/g;
         return text
             .replace("<WordWrap>", " ")
             .replace("<SIMPLE>", " ")
             .replace("<CENTER>", " ")
             .replace("<br>", " ")
             .replace("<BR>", " ")
-            .replace(characterRegex, "$2: ")
-            .replace(colourOnlyRegex, "$1")
-            .replace(playerRegex, "Me: ")
-            .replace(escapeSequencesRegex, " ")
-            .replace(nonTextRegex, " ");
+            .replace("RESETCOLOR", "")
+            .replace("", "")
+            .replace("", "")
+            .replace(displayCharactersRegex, "")
+            .replace(colourOnlyRegex, "");
+    }
+
+    function sanitizeNameBoxText(text) {
+        // Yanfly nameboxes come with their own weird formats and no convenient way of just having the plaintext
+        const colourOnlyRegex = /\\*c\[\d+\]/g;
+        const nonAlphaNumericOrPunctuationRegex = /[^\w.,?!*_ -]+/g;
+        return text
+            .replace(colourOnlyRegex, "")
+            .replace("RESETCOLOR", "")
+            .replace(nonAlphaNumericOrPunctuationRegex, "");
     }
 
     function setTextTo(message) {
-        var formattedMessage = sanitizeForScreenReader(message);
+        const formattedMessage = sanitizeForScreenReader(message);
         getSrElement().innerText = "";
         getSrElement().innerText = formattedMessage;
     }
 
     // attempted core engine overrides
 
-    var originalMessageAdd = Game_Message.prototype.add;
-    Game_Message.prototype.add = function(text) {
-        originalMessageAdd.call(this, text);
-        var allText = this.allText();
-        setTextTo(allText);
+    const originalMessageWindowStartMessage = Window_Message.prototype.startMessage;
+    Window_Message.prototype.startMessage = function() {
+        originalMessageWindowStartMessage.call(this);
+        const allText = $gameMessage.allText();
+        let output = this.convertEscapeCharacters(allText);
+        // in Yanfly message windows, name is separate
+        if (Yanfly && Yanfly.nameWindow && this.hasDifferentNameBoxText()) {
+            // the _text indicates that it should be private/internal, however, there's no public field for the text, so we'll take it
+            const name = sanitizeNameBoxText(Yanfly.nameWindow._text);
+            output = `${name}: ${output}`;
+        }
+
+        setTextTo(output);
     }
 
     var originalCommandSelect = Window_Command.prototype.select;
