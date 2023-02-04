@@ -29,18 +29,19 @@
     }
 
     function sanitizeForScreenReader(text) {
+        const displayEscapeCharactersRegex = /[\{\}^]/g;
         const colourOnlyRegex = /\\*c\[\d+\]/g;
-        const displayCharactersRegex = /[\{\}^]/g;
+        const resetColorRegex = /RESETCOLOR/g;
+        const unprintableSymbolsRegex = /[]/g;
         return text
             .replace("<WordWrap>", " ")
             .replace("<SIMPLE>", " ")
             .replace("<CENTER>", " ")
             .replace("<br>", " ")
             .replace("<BR>", " ")
-            .replace("RESETCOLOR", "")
-            .replace("", "")
-            .replace("", "")
-            .replace(displayCharactersRegex, "")
+            .replace(resetColorRegex, "")
+            .replace(unprintableSymbolsRegex, "")
+            .replace(displayEscapeCharactersRegex, "")
             .replace(colourOnlyRegex, "");
     }
 
