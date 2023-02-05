@@ -26,6 +26,7 @@ describe('Screen Reader Access plugin', () => {
             global.Window_ScrollText = jasmine.createSpy('Window_ScrollText');
             global.Window_BattleActor = jasmine.createSpy('Window_BattleActor');
             global.Window_BattleEnemy = jasmine.createSpy('Window_BattleEnemy');
+            global.Window_ItemList = jasmine.createSpy('Window_ItemList');
         });
 
         afterAll(() => {
@@ -188,6 +189,13 @@ describe('Screen Reader Access plugin', () => {
                         name: "\\c[15]<Lulu>RESETCOLOR",
                         gameMessage: "No matter how \c[12]darkRESETCOLOR the night, the \c[2]morningRESETCOLOR always comes.",
                         expectedOutput: "Lulu: No matter how dark the night, the morning always comes."
+                    },
+                    {
+                        // we shouldn't *have* to parse these, but I've seen them and it trips up screen readers
+                        testName: "a message with a random unprintable character instead of a backslash",
+                        name: "\\c[15]c[12]<Count Dracular>RESETCOLOR",
+                        gameMessage: "What is a man? But a miserable pile of secrets.",
+                        expectedOutput: "Count Dracular: What is a man? But a miserable pile of secrets."
                     }
                 ]) {
                     describe(`And it contains ${testCase.testName}`, () => {

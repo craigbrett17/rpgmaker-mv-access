@@ -49,11 +49,14 @@
     function sanitizeNameBoxText(text) {
         // Yanfly nameboxes come with their own weird formats and no convenient way of just having the plaintext
         const colourOnlyRegex = /\\{1,2}c\[\d+\]/g;
+        // have spotted these in the wild where an unprintable character takes over from the "\"
+        const malformedColourRegex = /[^ -~]{1,2}c\[\d+\]/g;
         const loneColourRegex = /\\{1,2}c/g;
         const resetColourRegex = /RESETCOLOR/g;
         const nonAlphaNumericOrPunctuationRegex = /[^\w.,?!*_ -]+/g;
         return text
             .replace(colourOnlyRegex, "")
+            .replace(malformedColourRegex, "")
             .replace(loneColourRegex, "")
             .replace(resetColourRegex, "")
             .replace(nonAlphaNumericOrPunctuationRegex, "");
