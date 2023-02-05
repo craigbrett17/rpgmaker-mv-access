@@ -119,6 +119,14 @@
         setTextTo(output);
     }
 
+    var originalScrollTextStartMessage = Window_ScrollText.prototype.startMessage;
+    Window_ScrollText.prototype.startMessage = function() {
+        originalScrollTextStartMessage.call(this);
+        const allText = $gameMessage.allText();
+        const output = this.convertEscapeCharacters(allText);
+        setTextTo(output);
+    }
+
     var originalCommandSelect = Window_Command.prototype.select;
     Window_Command.prototype.select = function(index) {
         originalCommandSelect.call(this, index);
