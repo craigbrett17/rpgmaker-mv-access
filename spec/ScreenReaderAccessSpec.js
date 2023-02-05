@@ -2,7 +2,7 @@ const { JSDOM } = require('jsdom');
 
 describe('Screen Reader Access plugin', () => {
     let document, dom;
-    let windowMessage, windowCommand, windowSkillList, windowOptions, windowBattleLog;
+    let windowMessage;
     let startMessageCallSpy;
 
     const loadPlugin = () => require('../src/ScreenReaderAccess');
@@ -19,14 +19,13 @@ describe('Screen Reader Access plugin', () => {
                 convertEscapeCharacters: jasmine.createSpy('Window_Message.convertEscapeCharacters').and.callFake((text) => text)
             }
             global.Window_Message = { prototype: windowMessage };
-            windowCommand = jasmine.createSpy('Window_Command');
-            global.Window_Command = windowCommand;
-            windowSkillList = jasmine.createSpy('Window_SkillList');
-            global.Window_SkillList = windowSkillList;
-            windowOptions = jasmine.createSpy('Window_Options');
-            global.Window_Options = windowOptions;
-            windowBattleLog = jasmine.createSpy('Window_BattleLog');
-            global.Window_BattleLog = windowBattleLog;
+            global.Window_Command = jasmine.createSpy('Window_Command');
+            global.Window_SkillList = jasmine.createSpy('Window_SkillList');
+            global.Window_Options = jasmine.createSpy('Window_Options');
+            global.Window_BattleLog = jasmine.createSpy('Window_BattleLog');
+            global.Window_ScrollText = jasmine.createSpy('Window_ScrollText');
+            global.Window_BattleActor = jasmine.createSpy('Window_BattleActor');
+            global.Window_BattleEnemy = jasmine.createSpy('Window_BattleEnemy');
         });
 
         afterAll(() => {
@@ -49,9 +48,10 @@ describe('Screen Reader Access plugin', () => {
             beforeEach(() => {
                 loadPlugin();
 
-                $gameMessageSpy = jasmine.createSpyObj('$gameMessage', ['allText']);
+                $gameMessageSpy = jasmine.createSpyObj('$gameMessage', ['allText', 'faceName']);
                 $gameMessageSpy.allText.and.returnValue("");
                 global.$gameMessage = $gameMessageSpy;
+                global.$dataActors = [];
             });
 
             it('Then it should call through to the original engine code', () => {
@@ -99,6 +99,42 @@ describe('Screen Reader Access plugin', () => {
 
                     const output = document.getElementById('sr-only').innerText;
                     expect(output).toBe(expectedMessage);
+                });
+            });
+
+            describe('And the message box has a character face set', () => {
+                beforeEach(() => {
+                    $gameMessageSpy.faceName.and.returnValue('butterface');
+                    $gameMessageSpy.allText.and.returnValue("Mooooo!");
+                });
+
+                describe('And the face matches an actor faceName', () => {
+                    beforeEach(() => {
+                        global.$dataActors.push({
+                            name: 'Butterface the Cow',
+                            faceName: 'butterface'
+                        });
+                    });
+
+                    it('Then the name is set to the name of the actor', () => {
+                        const expectedOutput = "Butterface the Cow: Mooooo!";
+
+                        Window_Message.prototype.startMessage();
+
+                        const output = document.getElementById('sr-only').innerText;
+                        expect(output).toBe(expectedOutput);
+                    });
+                });
+
+                describe('And the face does not  match an actor faceName', () => {
+                    it('Then the name is set to the faceName', () => {
+                        const expectedOutput = "butterface: Mooooo!";
+
+                        Window_Message.prototype.startMessage();
+
+                        const output = document.getElementById('sr-only').innerText;
+                        expect(output).toBe(expectedOutput);
+                    });
                 });
             });
 

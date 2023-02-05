@@ -1,1 +1,0 @@
-Window_Message = () => { }

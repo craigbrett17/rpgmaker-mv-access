@@ -114,6 +114,10 @@
             // the _text indicates that it should be private/internal, however, there's no public field for the text, so we'll take it
             const name = sanitizeNameBoxText(Yanfly.nameWindow._text);
             output = `${name}: ${output}`;
+        } else if ($gameMessage.faceName()) {
+            var actorWithFace = $dataActors.find((a) => a != null && a.faceName == $gameMessage.faceName());
+            var faceText = (actorWithFace) ? actorWithFace.name : $gameMessage.faceName();
+            output = `${faceText}: ${output}`;
         }
 
         setTextTo(output);
