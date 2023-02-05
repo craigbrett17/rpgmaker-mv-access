@@ -3,7 +3,7 @@ const { JSDOM } = require('jsdom');
 describe('Screen Reader Access plugin', () => {
     let document, dom;
     let windowMessage, windowCommand, windowSkillList, windowOptions, windowBattleLog;
-    let startMessageSpy, convertEscapeCharactersSpy;
+    let startMessageCallSpy;
 
     const loadPlugin = () => require('../src/ScreenReaderAccess');
 
@@ -13,9 +13,11 @@ describe('Screen Reader Access plugin', () => {
             document = global.document = dom.window.document;
 
             // spy on the objects we monkeypatch
-            startMessageSpy = jasmine.createSpy('startMessage', ['call']);
-            convertEscapeCharactersSpy = jasmine.createSpy('convertEscapeCharacters').and.callFake((text) => text);
-            windowMessage = jasmine.createSpy('Window_Message', { startMessage: startMessageSpy, convertEscapeCharacters: convertEscapeCharactersSpy });
+            startMessageCallSpy = jasmine.createSpy('Window_Message.startMessage.call')
+            windowMessage = {
+                startMessage: jasmine.createSpy('Window_Message.startMessage', { call: startMessageCallSpy }),
+                convertEscapeCharacters: jasmine.createSpy('Window_Message.convertEscapeCharacters').and.callFake((text) => text)
+            }
             global.Window_Message = { prototype: windowMessage };
             windowCommand = jasmine.createSpy('Window_Command');
             global.Window_Command = windowCommand;
@@ -48,9 +50,7 @@ describe('Screen Reader Access plugin', () => {
                 loadPlugin();
 
                 $gameMessageSpy = jasmine.createSpyObj('$gameMessage', ['allText']);
-                $gameMessageSpy.allText.and.callFake(() => {
-                    return "Some fake text";
-                });
+                $gameMessageSpy.allText.and.returnValue("");
                 global.$gameMessage = $gameMessageSpy;
             });
 
@@ -58,12 +58,119 @@ describe('Screen Reader Access plugin', () => {
                 Window_Message.prototype.startMessage();
 
                 // Assert that the spy was called
-                expect(startMessageSpy).toHaveBeenCalled();
+                expect(startMessageCallSpy).toHaveBeenCalled();
             });
 
-            it('Then the expected text is output', () => {
-                expect(true).toBeTruthy();
-            })
+            for (const testCase of [
+                {
+                    testName: "a standard message",
+                    gameMessage: "She took a deep breath and prepared for battle.",
+                    expectedOutput: "She took a deep breath and prepared for battle."
+                },
+                {
+                    testName: "a message containing some random unprintable characters",
+                    gameMessage: "Stealth camouflage! Can't you even die right?",
+                    expectedOutput: "Stealth camouflage! Can't you even die right?"
+                }
+            ]) {
+                describe(`And it contains ${testCase.testName}`, () => {
+                    it('Then the expected text is output', () => {
+                        $gameMessageSpy.allText.and.returnValue(testCase.gameMessage);
+
+                        Window_Message.prototype.startMessage();
+
+                        const output = document.getElementById('sr-only').innerText;
+                        expect(output).toBe(testCase.expectedOutput);
+                    });
+                });
+            }
+
+            describe('And it contains escape characters that the game will replace', () => {
+                it('Then the changes from convertEscapeCharacters appear in the output', () => {
+                    const originalMessage = "\N[1] reached out, grasping the \W[1] firmly.";
+                    const expectedMessage = "Samir reached out, grasping the Masamune firmly.";
+                    $gameMessageSpy.allText.and.returnValue(originalMessage);
+                    windowMessage.convertEscapeCharacters.and.callFake((text) => {
+                        return text.replace("\N[1]", "Samir")
+                            .replace("\W[1]", "Masamune");
+                    });
+
+                    Window_Message.prototype.startMessage();
+
+                    const output = document.getElementById('sr-only').innerText;
+                    expect(output).toBe(expectedMessage);
+                });
+            });
+
+            describe('And it uses Yanfly MessageCore message window', () => {
+                let yanflySpy;
+
+                beforeEach(() => {
+                    yanflySpy = jasmine.createSpy('Yanfly', { nameWindow: { _text: undefined } });
+                    global.Yanfly = yanflySpy;
+                    windowMessage.hasDifferentNameBoxText = jasmine.createSpy('hasDifferentNameBoxText')
+                        .and.returnValue(true);
+                });
+
+                afterEach(() => {
+                    delete global.Yanfly;
+                    delete windowMessage.hasDifferentNameBoxText;
+                });
+
+                for (const testCase of [
+                    {
+                        testName: "a standard message with no name",
+                        gameMessage: "Endure and survive",
+                        expectedOutput: "Endure and survive"
+                    },
+                    {
+                        testName: "a message from a speaker",
+                        name: "<Mario>",
+                        gameMessage: "It's a me!",
+                        expectedOutput: "Mario: It's a me!"
+                    },
+                    {
+                        testName: "a message from a speaker in colour",
+                        name: "\\c[2]Lara Croft\\c",
+                        gameMessage: "Hmmm. Where did I put that buttler?",
+                        expectedOutput: "Lara Croft: Hmmm. Where did I put that buttler?"
+                    },
+                    {
+                        testName: "a message that is in larger font",
+                        name: "\\c[5]<Campbell>\\c",
+                        gameMessage: "{{{SNAAAAAKE!}}}",
+                        expectedOutput: "Campbell: SNAAAAAKE!"
+                    },
+                    {
+                        testName: "a message that is in smaller font",
+                        name: "Youngster",
+                        gameMessage: "}I like shorts. They're comfortable and easy to wear.{",
+                        expectedOutput: "Youngster: I like shorts. They're comfortable and easy to wear."
+                    },
+                    {
+                        testName: "a message with multiple RESETCOLOR calls",
+                        name: "\\c[15]<Lulu>RESETCOLOR",
+                        gameMessage: "No matter how \c[12]darkRESETCOLOR the night, the \c[2]morningRESETCOLOR always comes.",
+                        expectedOutput: "Lulu: No matter how dark the night, the morning always comes."
+                    }
+                ]) {
+                    describe(`And it contains ${testCase.testName}`, () => {
+                        it('Then the expected text is output', () => {
+                            $gameMessageSpy.allText.and.callFake(() => testCase.gameMessage);
+                            if (testCase.name) {
+                                yanflySpy.nameWindow._text = testCase.name;
+                            } else {
+                                windowMessage.hasDifferentNameBoxText.and.returnValue(false);
+                            }
+
+                            Window_Message.prototype.startMessage();
+
+                            const output = document.getElementById('sr-only').innerText;
+                            expect(output).toBe(testCase.expectedOutput);
+                        });
+                    });
+                }
+            });
         });
     });
 });
