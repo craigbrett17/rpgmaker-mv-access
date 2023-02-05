@@ -60,12 +60,12 @@
     }
 
     function replaceIconsWithNames(text) {
-        const iconRegex = /\\{1,2}I\[(\d+)\]/g;
+        const iconRegex = /\\{1,2}[iI]\[(\d+)\]/g;
         return text
             .replace(iconRegex, function (match, iconIndex) {
                 var name = findNameByIconIndex(iconIndex);
                 if (name) {
-                    return name;
+                    return name + " ";
                 } else {
                     return "";
                 }
@@ -85,10 +85,10 @@
         ];
 
         for (const db of databases) {
-            for (const item of db) {
-                if (item.iconIndex == iconIndex) {
-                    return item.name;
-                }
+            var match = db.find((item) => item != null && item.iconIndex == iconIndex);
+
+            if (match) {
+                return match.name;
             }
         }
 
