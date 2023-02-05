@@ -29,6 +29,7 @@
     }
 
     function sanitizeForScreenReader(text) {
+        // a bunch of these may be Yanfly only, will need a non-Yanfly game to verify
         const displayEscapeCharactersRegex = /[\{\}^]/g;
         const colourOnlyRegex = /\\*c\[\d+\]/g;
         const resetColorRegex = /RESETCOLOR/g;
@@ -114,6 +115,32 @@
     Window_BattleLog.prototype.addText = function(text) {
         originalBattleLogAddText.call(this, text);
         setTextTo(text);
+    }
+
+    var originalBattleActorSelect = Window_BattleActor.prototype.select;
+    Window_BattleActor.prototype.select = function(index) {
+        originalBattleActorSelect.call(this, index);
+        var actor = this.actor();
+        if (actor) {
+            setTextTo(`${actor.name()}: ${actor.hp} / ${actor.mhp}`);
+        }
+    }
+
+    var originalBattleEnemySelect = Window_BattleEnemy.prototype.select;
+    Window_BattleEnemy.prototype.select = function(index) {
+        originalBattleEnemySelect.call(this, index);
+        var enemy = this.enemy();
+        if (enemy) {
+            setTextTo(`${enemy.name()}: ${enemy.hp} / ${enemy.mhp}`);
+        }
+    }
+
+    var originalBattleManagerGetNextSubject = BattleManager.getNextSubject;
+    BattleManager.getNextSubject = function() {
+        var battler = originalBattleManagerGetNextSubject();
+        if (battler) {
+            setTextTo(battler.name())
+        }
     }
 
     // actually add the sr-only element to the game document
