@@ -73,7 +73,7 @@
         let output = this.convertEscapeCharacters(allText);
         // in Yanfly message windows, name is separate
         if (typeof Yanfly !== 'undefined' && Yanfly && typeof Yanfly.nameWindow !== 'undefined' && Yanfly.nameWindow && 
-                this.hasDifferentNameBoxText()) {
+                typeof this.hasDifferentNameBoxText !== 'undefined' && this.hasDifferentNameBoxText()) {
             // the _text indicates that it should be private/internal, however, there's no public field for the text, so we'll take it
             const name = sanitizeNameBoxText(Yanfly.nameWindow._text);
             output = `${name}: ${output}`;
