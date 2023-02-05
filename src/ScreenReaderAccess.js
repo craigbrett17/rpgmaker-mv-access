@@ -184,6 +184,19 @@
         }
     }
 
+    const originalItemListSelect = Window_ItemList.prototype.select;
+    Window_ItemList.prototype.select = function(index) {
+        originalItemListSelect .call(this, index);
+        const item = this.item();
+
+        if (item) {
+            const output = `${item.name} 
+                ${this.needsNumber() ? ": " + $gameParty.numItems(item) : ""}. 
+                ${replaceIconsWithNames(item.description)}`;
+            setTextTo(output);
+        }
+    }
+
     // actually add the sr-only element to the game document
 
     if (document) {
