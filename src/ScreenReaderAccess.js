@@ -59,6 +59,42 @@
             .replace(nonAlphaNumericOrPunctuationRegex, "");
     }
 
+    function replaceIconsWithNames(text) {
+        const iconRegex = /\\{1,2}I\[(\d+)\]/g;
+        return text
+            .replace(iconRegex, function (match, iconIndex) {
+                var name = findNameByIconIndex(iconIndex);
+                if (name) {
+                    return name;
+                } else {
+                    return "";
+                }
+            });
+    }
+
+    function findNameByIconIndex(iconIndex) {
+        // since a call to icon will often just rely on the icon's position in the sprite sheet
+        // and not necessarily come with any useful context, we have to do a reverse lookup in all the databases
+        // to see if we can find the name of the item that the icon is for
+        var databases = [
+            $dataItems,
+            $dataWeapons,
+            $dataArmors,
+            $dataSkills,
+            $dataStates
+        ];
+
+        for (const db of databases) {
+            for (const item of db) {
+                if (item.iconIndex == iconIndex) {
+                    return item.name;
+                }
+            }
+        }
+
+        return null;
+    }
+
     function setTextTo(message) {
         const formattedMessage = sanitizeForScreenReader(message);
         getSrElement().innerText = "";
@@ -97,7 +133,8 @@
         originalSkillListSelect.call(this, index);
         var item = this.item();
         if (item) {
-            setTextTo(item.name + ": " + item.description);
+            var description = replaceIconsWithNames(item.description);
+            setTextTo(item.name + ": " + description);
         }
     }
 
@@ -132,14 +169,6 @@
         var enemy = this.enemy();
         if (enemy) {
             setTextTo(`${enemy.name()}: ${enemy.hp} / ${enemy.mhp}`);
-        }
-    }
-
-    var originalBattleManagerGetNextSubject = BattleManager.getNextSubject;
-    BattleManager.getNextSubject = function() {
-        var battler = originalBattleManagerGetNextSubject();
-        if (battler) {
-            setTextTo(battler.name())
         }
     }
 
