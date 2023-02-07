@@ -148,8 +148,13 @@
         originalSkillListSelect.call(this, index);
         var item = this.item();
         if (item) {
-            var description = replaceIconsWithNames(item.description);
-            setTextTo(item.name + ": " + description);
+            if (item.description) {
+                var description = replaceIconsWithNames(item.description);
+                setTextTo(item.name + ": " + description);
+            } else {
+                setTextTo(item.name);
+            }
+            
         }
     }
 
@@ -195,7 +200,7 @@
         if (item) {
             const output = `${item.name} 
                 ${this.needsNumber() ? ": " + $gameParty.numItems(item) : ""}. 
-                ${replaceIconsWithNames(item.description)}`;
+                ${item.description ? replaceIconsWithNames(item.description) : ""}`;
             setTextTo(output);
         }
     }
