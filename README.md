@@ -1,12 +1,12 @@
-# RPGMaker MV ScreenReaderAccess
+# RPGMaker MV Access
 
-An RPGMaker MV plugin to make it easy for RPGMaker authors to make games accessible to screen reader users
+A series (eventually) of RPGMaker MV plugins to improve the accessibility of RPGMaker MV games.
 
 ## How to use
 
-Copy the ScreenReaderAccess.js file from this repository into the plugins directory of your game. You may modify it as needed, or have your own code that uses it, just please keep the attribution in that file.
+Copy the plugin's file from src (i.e ScreenReaderAccess.js) from this repository into the plugins directory of your game. You may modify it as needed, or have your own code that uses it, just please keep the attribution in that file.
 
-Then, enable it in your plugins.js file:
+Then, enable it in your plugins.js file. An example using the ScreenReaderAccess plugin.
 
 ```
 ... plugins
