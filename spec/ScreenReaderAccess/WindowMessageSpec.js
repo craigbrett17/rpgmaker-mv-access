@@ -1,11 +1,12 @@
 const { JSDOM } = require('jsdom');
+const { initializeSpies } = require('./SpySetup')
 
 describe('Screen Reader Access plugin', () => {
     let document, dom;
     let windowMessage;
     let startMessageCallSpy;
 
-    const loadPlugin = () => require('../src/ScreenReaderAccess');
+    const loadPlugin = () => require('../../src/ScreenReaderAccess');
 
     describe('Given a blank new window', () => {
         beforeAll(() => {
@@ -13,20 +14,13 @@ describe('Screen Reader Access plugin', () => {
             document = global.document = dom.window.document;
 
             // spy on the objects we monkeypatch
+            initializeSpies();
             startMessageCallSpy = jasmine.createSpy('Window_Message.startMessage.call')
             windowMessage = {
                 startMessage: jasmine.createSpy('Window_Message.startMessage', { call: startMessageCallSpy }),
                 convertEscapeCharacters: jasmine.createSpy('Window_Message.convertEscapeCharacters').and.callFake((text) => text)
             }
             global.Window_Message = { prototype: windowMessage };
-            global.Window_Command = jasmine.createSpy('Window_Command');
-            global.Window_SkillList = jasmine.createSpy('Window_SkillList');
-            global.Window_Options = jasmine.createSpy('Window_Options');
-            global.Window_BattleLog = jasmine.createSpy('Window_BattleLog');
-            global.Window_ScrollText = jasmine.createSpy('Window_ScrollText');
-            global.Window_BattleActor = jasmine.createSpy('Window_BattleActor');
-            global.Window_BattleEnemy = jasmine.createSpy('Window_BattleEnemy');
-            global.Window_ItemList = jasmine.createSpy('Window_ItemList');
         });
 
         afterAll(() => {
