@@ -1,13 +1,28 @@
+const spiedOn = [
+    'Window_Message',
+    'Window_Command',
+    'Window_SkillList',
+    'Window_Options',
+    'Window_BattleLog',
+    'Window_ScrollText',
+    'Window_BattleActor',
+    'Window_BattleEnemy',
+    'Window_ItemList'
+]
+
 function initializeSpies() {
-    global.Window_Message = jasmine.createSpy('Window_Message');
-    global.Window_Command = jasmine.createSpy('Window_Command');
-    global.Window_SkillList = jasmine.createSpy('Window_SkillList');
-    global.Window_Options = jasmine.createSpy('Window_Options');
-    global.Window_BattleLog = jasmine.createSpy('Window_BattleLog');
-    global.Window_ScrollText = jasmine.createSpy('Window_ScrollText');
-    global.Window_BattleActor = jasmine.createSpy('Window_BattleActor');
-    global.Window_BattleEnemy = jasmine.createSpy('Window_BattleEnemy');
-    global.Window_ItemList = jasmine.createSpy('Window_ItemList');
+    for (const spyName of spiedOn) {
+        global[spyName] = jasmine.createSpy(spyName);
+    }
 }
 
-module.exports = { initializeSpies };
+function destroySpies() {
+    for (const spyName of spiedOn) {
+        delete global[spyName];
+    }
+}
+
+module.exports = {
+    initializeSpies,
+    destroySpies
+};
