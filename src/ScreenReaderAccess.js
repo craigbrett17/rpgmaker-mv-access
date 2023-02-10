@@ -205,7 +205,7 @@
         }
     }
 
-    if (Imported && Imported.YEP_BattleEngineCore) {
+    if (typeof Imported !== 'undefined' && Imported && Imported.YEP_BattleEngineCore) {
         // Yanfly's BattleEngineCore allows people to turn off the BattleLog text changes that explain what's happened in a battle
         // which is great visually (I think), but we need that info, so we'll re-implement it here, but only output it to screen readers (if set)
         if (!Yanfly.Param.BECShowHpText) {
