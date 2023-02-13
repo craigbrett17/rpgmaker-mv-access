@@ -106,9 +106,23 @@
 
     // attempted core engine overrides
 
-    const originalMessageWindowStartMessage = Window_Message.prototype.startMessage;
+    // an object containing the original functions
+    // for the overrides, so that we can call the original function
+    const overrides = {
+        Window_Message_startMessage: Window_Message.prototype.startMessage,
+        Window_ScrollText_startMessage: Window_ScrollText.prototype.startMessage,
+        Window_Command_select: Window_Command.prototype.select,
+        Window_SkillList_select: Window_SkillList.prototype.select,
+        Window_Options_select: Window_Options.prototype.select,
+        Window_BattleLog_addText: Window_BattleLog.prototype.addText,
+        Window_BattleActor_select: Window_BattleActor.prototype.select,
+        Window_BattleEnemy_select: Window_BattleEnemy.prototype.select,
+        Window_ItemList_select: Window_ItemList.prototype.select,
+        Window_BattleLog_displayHpDamage: Window_BattleLog.prototype.displayHpDamage
+    };
+
     Window_Message.prototype.startMessage = function() {
-        originalMessageWindowStartMessage.call(this);
+        overrides.Window_Message_startMessage.call(this);
         const allText = $gameMessage.allText();
         let output = this.convertEscapeCharacters(allText);
         // in Yanfly message windows, name is separate
@@ -126,26 +140,23 @@
         setTextTo(output);
     }
 
-    var originalScrollTextStartMessage = Window_ScrollText.prototype.startMessage;
     Window_ScrollText.prototype.startMessage = function() {
-        originalScrollTextStartMessage.call(this);
+        overrides.Window_ScrollText_startMessage.call(this);
         const allText = $gameMessage.allText();
         const output = this.convertEscapeCharacters(allText);
         setTextTo(output);
     }
 
-    var originalCommandSelect = Window_Command.prototype.select;
     Window_Command.prototype.select = function(index) {
-        originalCommandSelect.call(this, index);
+        overrides.Window_Command_select.call(this, index);
         var command = this.currentData();
         if (command) {
             setTextTo(command.name);
         }
     }
 
-    var originalSkillListSelect = Window_SkillList.prototype.select;
     Window_SkillList.prototype.select = function(index) {
-        originalSkillListSelect.call(this, index);
+        overrides.Window_SkillList_select.call(this, index);
         var item = this.item();
         if (item) {
             if (item.description) {
@@ -154,13 +165,11 @@
             } else {
                 setTextTo(item.name);
             }
-            
         }
     }
 
-    var originalOptionsSelect = Window_Options.prototype.select;
     Window_Options.prototype.select = function(index) {
-        originalOptionsSelect.call(this, index);
+        overrides.Window_Options_select.call(this, index);
         var command = this.currentData();
         if (command) {
             var optionText = `${this.commandName(index)}: ${this.statusText(index)}`;
@@ -168,33 +177,29 @@
         }
     }
 
-    var originalBattleLogAddText = Window_BattleLog.prototype.addText;
     Window_BattleLog.prototype.addText = function(text) {
-        originalBattleLogAddText.call(this, text);
+        overrides.Window_BattleLog_addText.call(this, text);
         setTextTo(text);
     }
 
-    var originalBattleActorSelect = Window_BattleActor.prototype.select;
     Window_BattleActor.prototype.select = function(index) {
-        originalBattleActorSelect.call(this, index);
+        overrides.Window_BattleActor_select.call(this, index);
         var actor = this.actor();
         if (actor) {
             setTextTo(`${actor.name()}: ${actor.hp} / ${actor.mhp}`);
         }
     }
 
-    var originalBattleEnemySelect = Window_BattleEnemy.prototype.select;
     Window_BattleEnemy.prototype.select = function(index) {
-        originalBattleEnemySelect.call(this, index);
+        overrides.Window_BattleEnemy_select.call(this, index);
         var enemy = this.enemy();
         if (enemy) {
             setTextTo(`${enemy.name()}: ${enemy.hp} / ${enemy.mhp}`);
         }
     }
 
-    const originalItemListSelect = Window_ItemList.prototype.select;
     Window_ItemList.prototype.select = function(index) {
-        originalItemListSelect .call(this, index);
+        overrides.Window_ItemList_select.call(this, index);
         const item = this.item();
 
         if (item) {
@@ -210,9 +215,8 @@
         // which is great visually (I think), but we need that info, so we'll re-implement it here, but only output it to screen readers (if set)
         if (!Yanfly.Param.BECShowHpText) {
             // hp text suppressed
-            var originalBattleLogDisplayHpDamage = Window_BattleLog.prototype.displayHpDamage;
             Window_BattleLog.prototype.displayHpDamage = function(target) {
-                originalBattleLogDisplayHpDamage.call(this, target);
+                overrides.Window_BattleLog_displayHpDamage.call(this, target);
                 if (target.result().hpAffected) {
                     setTextTo(this.makeHpDamageText(target));
                 }
