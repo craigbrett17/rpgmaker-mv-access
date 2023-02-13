@@ -7,6 +7,7 @@ describe('Screen Reader Access plugin', () => {
     let startMessageCallSpy;
 
     const loadPlugin = () => require('../../src/ScreenReaderAccess');
+    const getAnnounceOutput = () => document.getElementById('sr-announce').innerText;
 
     describe('Given a blank new window', () => {
         beforeAll(() => {
@@ -73,7 +74,7 @@ describe('Screen Reader Access plugin', () => {
 
                             Window_Message.prototype.startMessage();
 
-                            const output = document.getElementById('sr-only').innerText;
+                            const output = getAnnounceOutput();
                             expect(output).toBe(testCase.expectedOutput);
                         });
                     });
@@ -91,7 +92,7 @@ describe('Screen Reader Access plugin', () => {
 
                         Window_Message.prototype.startMessage();
 
-                        const output = document.getElementById('sr-only').innerText;
+                        const output = getAnnounceOutput();
                         expect(output).toBe(expectedMessage);
                     });
                 });
@@ -115,7 +116,7 @@ describe('Screen Reader Access plugin', () => {
 
                             Window_Message.prototype.startMessage();
 
-                            const output = document.getElementById('sr-only').innerText;
+                            const output = getAnnounceOutput();
                             expect(output).toBe(expectedOutput);
                         });
                     });
@@ -126,7 +127,7 @@ describe('Screen Reader Access plugin', () => {
 
                             Window_Message.prototype.startMessage();
 
-                            const output = document.getElementById('sr-only').innerText;
+                            const output = getAnnounceOutput();
                             expect(output).toBe(expectedOutput);
                         });
                     });
@@ -202,7 +203,7 @@ describe('Screen Reader Access plugin', () => {
 
                                 Window_Message.prototype.startMessage();
 
-                                const output = document.getElementById('sr-only').innerText;
+                                const output = getAnnounceOutput();
                                 expect(output).toBe(testCase.expectedOutput);
                             });
                         });

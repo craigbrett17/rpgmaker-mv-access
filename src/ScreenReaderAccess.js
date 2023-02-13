@@ -15,9 +15,9 @@
         overflow: hidden; 
         border: 0;`;
 
-    function createSrElement() {
+    function createSrAnnounceElement() {
         var srOnlyElement = document.createElement('div');
-        srOnlyElement.id = "sr-only";
+        srOnlyElement.id = "sr-announce";
         srOnlyElement.setAttribute('aria-live', 'polite');
         srOnlyElement.setAttribute('aria-atomic', 'true');
         srOnlyElement.setAttribute('style', srOnlyCss);
@@ -25,7 +25,7 @@
     }
 
     function getSrElement() {
-        return document.getElementById('sr-only');
+        return document.getElementById('sr-announce');
     }
 
     function sanitizeForScreenReader(text) {
@@ -224,11 +224,11 @@
         }
     }
 
-    // actually add the sr-only element to the game document
+    // actually add the sr elements to the game document
 
     if (document) {
-        createSrElement();
+        createSrAnnounceElement();
     } else {
-        console.log("Unable to create sr-only element: Cannot find document.");
+        console.log("Unable to create sr-only elements: Cannot find document.");
     }
 })();

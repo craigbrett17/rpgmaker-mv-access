@@ -27,8 +27,8 @@ describe('Screen Reader Access plugin', () => {
                 loadPlugin();
             });
 
-            it('Then it should put the sr-only element on the body', () => {
-                expect(document.querySelector('#sr-only')).toBeTruthy();
+            it('Then it should put the sr elements on the body', () => {
+                expect(document.querySelector('#sr-announce')).toBeTruthy();
             });
         });
     });
