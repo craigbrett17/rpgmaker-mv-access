@@ -5,6 +5,8 @@
  */
 
 (function() {
+    const maxNumOfLogEntries = 20;
+    
     // nice easy way to specify the css
     var srOnlyCss = `position: absolute; 
         width: 1px; 
@@ -16,7 +18,7 @@
         border: 0;`;
 
     function createSrAnnounceElement() {
-        var srOnlyElement = document.createElement('div');
+        const srOnlyElement = document.createElement('div');
         srOnlyElement.id = "sr-announce";
         srOnlyElement.setAttribute('aria-live', 'polite');
         srOnlyElement.setAttribute('aria-atomic', 'true');
@@ -24,8 +26,19 @@
         document.body.appendChild(srOnlyElement);
     }
 
+    function createSrLogElement() {
+        const logElement = document.createElement('div');
+        logElement.id = "sr-log";
+        logElement.setAttribute('style', srOnlyCss);
+        document.body.appendChild(logElement);
+    }
+
     function getSrElement() {
         return document.getElementById('sr-announce');
+    }
+
+    function getSrLogElement() {
+        return document.getElementById('sr-log');
     }
 
     function sanitizeForScreenReader(text) {
@@ -98,10 +111,23 @@
         return null;
     }
 
+    function addToLog(text) {
+        const logContainer = getSrLogElement();
+        if (logContainer.childElementCount >= maxNumOfLogEntries) {
+            // remove the last log entry
+            logContainer.removeChild(logContainer.childNodes.item(logContainer.childElementCount - 1));
+        }
+
+        const entry = document.createElement('div');
+        entry.innerText = text;
+        logContainer.prepend(entry);
+    }
+
     function setTextTo(message) {
         const formattedMessage = sanitizeForScreenReader(message);
         getSrElement().innerText = "";
         getSrElement().innerText = formattedMessage;
+        addToLog(formattedMessage);
     }
 
     // attempted core engine overrides
@@ -228,6 +254,7 @@
 
     if (document) {
         createSrAnnounceElement();
+        createSrLogElement();
     } else {
         console.log("Unable to create sr-only elements: Cannot find document.");
     }

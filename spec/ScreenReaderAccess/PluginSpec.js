@@ -29,6 +29,7 @@ describe('Screen Reader Access plugin', () => {
 
             it('Then it should put the sr elements on the body', () => {
                 expect(document.querySelector('#sr-announce')).toBeTruthy();
+                expect(document.querySelector('#sr-log')).toBeTruthy();
             });
         });
     });
