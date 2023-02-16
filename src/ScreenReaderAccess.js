@@ -146,7 +146,10 @@
         Window_ItemList_select: Window_ItemList.prototype.select,
         Window_BattleLog_displayHpDamage: Window_BattleLog.prototype.displayHpDamage,
         Window_BattleLog_displayMpDamage: Window_BattleLog.prototype.displayMpDamage,
-        Window_BattleLog_displayTpDamage: Window_BattleLog.prototype.displayTpDamage
+        Window_BattleLog_displayTpDamage: Window_BattleLog.prototype.displayTpDamage,
+        Window_BattleLog_displayCurrentState: Window_BattleLog.prototype.displayCurrentState,
+        Window_BattleLog_displayAddedStates: Window_BattleLog.prototype.displayAddedStates,
+        Window_BattleLog_displayRemovedStates: Window_BattleLog.prototype.displayRemovedStates
     };
 
     Window_Message.prototype.startMessage = function() {
@@ -268,6 +271,36 @@
                 if (target.isAlive() && target.result().tpDamage !== 0) {
                     setTextTo(this.makeTpDamageText(target));
                 }
+            }
+        }
+
+        if (!Yanfly.Param.BECShowStateText) {
+            // state text suppressed
+            Window_BattleLog.prototype.displayCurrentState = function(subject) {
+                overrides.Window_BattleLog_displayCurrentState.call(this, subject);
+                const stateText = subject.mostImportantStateText();
+                if (stateText) {
+                    setTextTo(subject.name() + stateText);
+                }
+            }
+
+            Window_BattleLog.prototype.displayAddedStates = function(target) {
+                overrides.Window_BattleLog_displayAddedStates.call(this, target);
+                target.result().addedStateObjects().forEach((state) => {
+                    const stateMsg = target.isActor() ? state.message1 : state.message2;
+                    if (stateMsg) {
+                        setTextTo(target.name() + stateMsg);
+                    }
+                }, this);
+            }
+
+            Window_BattleLog.prototype.displayRemovedStates = function(target) {
+                overrides.Window_BattleLog_displayRemovedStates.call(this, target);
+                target.result().removedStateObjects().forEach(function(state) {
+                    if (state.message4) {
+                        setTextTo(target.name() + state.message4);
+                    }
+                }, this);
             }
         }
     }
