@@ -144,7 +144,9 @@
         Window_BattleActor_select: Window_BattleActor.prototype.select,
         Window_BattleEnemy_select: Window_BattleEnemy.prototype.select,
         Window_ItemList_select: Window_ItemList.prototype.select,
-        Window_BattleLog_displayHpDamage: Window_BattleLog.prototype.displayHpDamage
+        Window_BattleLog_displayHpDamage: Window_BattleLog.prototype.displayHpDamage,
+        Window_BattleLog_displayMpDamage: Window_BattleLog.prototype.displayMpDamage,
+        Window_BattleLog_displayTpDamage: Window_BattleLog.prototype.displayTpDamage
     };
 
     Window_Message.prototype.startMessage = function() {
@@ -245,6 +247,26 @@
                 overrides.Window_BattleLog_displayHpDamage.call(this, target);
                 if (target.result().hpAffected) {
                     setTextTo(this.makeHpDamageText(target));
+                }
+            }
+        }
+
+        if (!Yanfly.Param.BECShowMpText) {
+            // mp text suppressed
+            Window_BattleLog.prototype.displayMpDamage = function(target) {
+                overrides.Window_BattleLog_displayMpDamage.call(this, target);
+                if (target.isAlive() && target.result().mpDamage !== 0) {
+                    setTextTo(this.makeMpDamageText(target));
+                }
+            }
+        }
+
+        if (!Yanfly.Param.BECShowTpText) {
+            // tp text suppressed
+            Window_BattleLog.prototype.displayTpDamage = function(target) {
+                overrides.Window_BattleLog_displayTpDamage.call(this, target);
+                if (target.isAlive() && target.result().tpDamage !== 0) {
+                    setTextTo(this.makeTpDamageText(target));
                 }
             }
         }
