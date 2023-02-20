@@ -118,6 +118,10 @@
             logContainer.removeChild(logContainer.childNodes.item(logContainer.childElementCount - 1));
         }
 
+        if (logContainer.childElementCount > 0 && logContainer.childNodes.item(0).innerText == text) {
+            return; // duplicate log, possibly caused by override hierarchy
+        }
+
         const entry = document.createElement('div');
         entry.innerText = text;
         logContainer.prepend(entry);
