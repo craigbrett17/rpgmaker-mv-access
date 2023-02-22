@@ -41,8 +41,6 @@ describe('Screen Reader Access plugin', () => {
                 let $gameMessageSpy;
 
                 beforeEach(() => {
-                    loadPlugin();
-
                     $gameMessageSpy = jasmine.createSpyObj('$gameMessage', ['allText', 'faceName']);
                     $gameMessageSpy.allText.and.returnValue("");
                     global.$gameMessage = $gameMessageSpy;
