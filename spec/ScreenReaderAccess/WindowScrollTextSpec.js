@@ -33,7 +33,7 @@ describe('Screen Reader Access plugin', () => {
         });
 
         describe('And the plugin is loaded', () => {
-            beforeEach(() => {
+            beforeAll(() => {
                 loadPlugin();
             });
 

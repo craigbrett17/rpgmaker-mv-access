@@ -4,7 +4,7 @@ const { initializeSpies, destroySpies } = require('./SpySetup')
 describe('Screen Reader Access plugin', () => {
     let document, dom;
     let windowCommand;
-    let selectCallSpy;
+    let selectCallSpy, currentDataSpy;
 
     const loadPlugin = () => require('../../src/ScreenReaderAccess');
     const getAnnounceOutput = () => document.getElementById('sr-announce').innerText;
@@ -16,8 +16,8 @@ describe('Screen Reader Access plugin', () => {
 
             // spy on the objects we monkeypatch
             initializeSpies();
-            selectCallSpy = jasmine.createSpy('Window_Command.select.call')
-            currentDataSpy = jasmine.createSpy('Window_Command.currentData')
+            selectCallSpy = jasmine.createSpy('Window_Command.select.call');
+            currentDataSpy = jasmine.createSpy('Window_Command.currentData');
             windowCommand = {
                 select: jasmine.createSpy('Window_Command.select', { call: selectCallSpy }),
                 currentData: currentDataSpy
@@ -34,15 +34,12 @@ describe('Screen Reader Access plugin', () => {
         });
 
         describe('And the plugin is loaded', () => {
-            beforeEach(() => {
-                if (document.getElementById('sr-announce')) {
-                    document.getElementById('sr-announce').innerText = null;
-                }
+            beforeAll(() => {
                 loadPlugin();
             });
 
             describe('And that a command window selection is changed to a valid value', () => {
-                beforeEach(() => {
+                beforeAll(() => {
                     currentDataSpy.and.returnValue({ name: "Load Game" });
                     
                     Window_Command.prototype.select(0);
@@ -61,7 +58,8 @@ describe('Screen Reader Access plugin', () => {
             });
             
             describe('And that a command window selection is changed to a null value', () => {
-                beforeEach(() => {
+                beforeAll(() => {
+                    document.querySelector('#sr-announce').innerText = undefined;
                     currentDataSpy.and.returnValue(null);
                     
                     Window_Command.prototype.select(0);
@@ -69,7 +67,7 @@ describe('Screen Reader Access plugin', () => {
 
                 it('Then no announcement should be made', () => {
                     const output = getAnnounceOutput();
-                    expect(output).toBeNull();
+                    expect(output).toBeUndefined();
                 });
             });
         });
