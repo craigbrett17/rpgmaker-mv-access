@@ -140,7 +140,7 @@
     // attempted core engine overrides
 
     // an object containing the original functions
-    // for the overrides, so that we can call the original function
+    // used in the override functions to call the underlying code
     const overrides = {
         Window_Message_startMessage: Window_Message.prototype.startMessage,
         Window_ScrollText_startMessage: Window_ScrollText.prototype.startMessage,
@@ -151,6 +151,9 @@
         Window_BattleActor_select: Window_BattleActor.prototype.select,
         Window_BattleEnemy_select: Window_BattleEnemy.prototype.select,
         Window_ItemList_select: Window_ItemList.prototype.select,
+        Window_ShopBuy_select: Window_ShopBuy.prototype.select,
+        Window_ShopBuy_select: Window_ShopBuy.prototype.select,
+        Window_ShopNumber_changeNumber: Window_ShopNumber.prototype.changeNumber,
         Window_BattleLog_displayHpDamage: Window_BattleLog.prototype.displayHpDamage,
         Window_BattleLog_displayMpDamage: Window_BattleLog.prototype.displayMpDamage,
         Window_BattleLog_displayTpDamage: Window_BattleLog.prototype.displayTpDamage,
@@ -244,6 +247,31 @@
             const output = `${item.name} 
                 ${this.needsNumber() ? ": " + $gameParty.numItems(item) : ""}. 
                 ${item.description ? replaceIconsWithNames(item.description) : ""}`;
+            setTextTo(output);
+        }
+    }
+
+    Window_ShopBuy.prototype.select = function(index) {
+        overrides.Window_ShopBuy_select.call(this, index);
+        // seems to be a bug in the implementation of ShopBuy.item where it doesn't check for valid index
+        const item = this._data && index >= 0 ? this.item() : null;
+
+        if (item) {
+            const output = `${item.name}, 
+                ${this.price(item)} ${TextManager.currencyUnit}, 
+                ${this.isCurrentItemEnabled() ? "" : "unavailable, "}
+                ${item.description ? replaceIconsWithNames(item.description) : ""}`;
+            setTextTo(output);
+        }
+    }
+
+    Window_ShopNumber.prototype.changeNumber = function(amount) {
+        overrides.Window_ShopNumber_changeNumber.call(this, amount);
+        const number = this.number();
+
+        if (number >= 0) {
+            const output = `${number}, 
+                ${this._price * number} ${TextManager.currencyUnit}`;
             setTextTo(output);
         }
     }

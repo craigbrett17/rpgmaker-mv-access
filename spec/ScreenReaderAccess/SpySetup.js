@@ -7,7 +7,9 @@ const spiedOn = [
     'Window_ScrollText',
     'Window_BattleActor',
     'Window_BattleEnemy',
-    'Window_ItemList'
+    'Window_ItemList',
+    'Window_ShopBuy',
+    'Window_ShopNumber'
 ]
 
 function initializeSpies() {
