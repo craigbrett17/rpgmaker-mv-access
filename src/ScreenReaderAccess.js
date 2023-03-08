@@ -5,9 +5,9 @@
  */
 
 (function() {
-    const maxNumOfLogEntries = 20;
+    var maxNumOfLogEntries = 20;
 
-    let lastLogMessage = null;
+    var lastLogMessage = null;
 
     // nice easy way to specify the css
     var srOnlyCss = `position: absolute; 
@@ -20,7 +20,7 @@
         border: 0;`;
 
     function createSrAnnounceElement() {
-        const srOnlyElement = document.createElement('div');
+        var srOnlyElement = document.createElement('div');
         srOnlyElement.id = "sr-announce";
         srOnlyElement.setAttribute('aria-live', 'polite');
         srOnlyElement.setAttribute('aria-atomic', 'true');
@@ -29,7 +29,7 @@
     }
 
     function createSrLogElement() {
-        const logElement = document.createElement('div');
+        var logElement = document.createElement('div');
         logElement.id = "sr-log";
         logElement.setAttribute('style', srOnlyCss);
         document.body.appendChild(logElement);
@@ -45,10 +45,10 @@
 
     function sanitizeForScreenReader(text) {
         // a bunch of these may be Yanfly only, will need a non-Yanfly game to verify
-        const displayEscapeCharactersRegex = /[\{\}^]/g;
-        const colourOnlyRegex = /\\*c\[\d+\]/g;
-        const resetColorRegex = /RESETCOLOR/g;
-        const unprintableSymbolsRegex = /[]/g;
+        var displayEscapeCharactersRegex = /[\{\}^]/g;
+        var colourOnlyRegex = /\\*c\[\d+\]/g;
+        var resetColorRegex = /RESETCOLOR/g;
+        var unprintableSymbolsRegex = /[]/g;
         return text
             .replace("<WordWrap>", " ")
             .replace("<SIMPLE>", " ")
@@ -63,12 +63,12 @@
 
     function sanitizeNameBoxText(text) {
         // Yanfly nameboxes come with their own weird formats and no convenient way of just having the plaintext
-        const colourOnlyRegex = /\\{1,2}c\[\d+\]/g;
+        var colourOnlyRegex = /\\{1,2}c\[\d+\]/g;
         // have spotted these in the wild where an unprintable character takes over from the "\"
-        const malformedColourRegex = /[^ -~]{1,2}c\[\d+\]/g;
-        const loneColourRegex = /\\{1,2}c/g;
-        const resetColourRegex = /RESETCOLOR/g;
-        const nonAlphaNumericOrPunctuationRegex = /[^\w.,?!*_ -]+/g;
+        var malformedColourRegex = /[^ -~]{1,2}c\[\d+\]/g;
+        var loneColourRegex = /\\{1,2}c/g;
+        var resetColourRegex = /RESETCOLOR/g;
+        var nonAlphaNumericOrPunctuationRegex = /[^\w.,?!*_ -]+/g;
         return text
             .replace(colourOnlyRegex, "")
             .replace(malformedColourRegex, "")
@@ -78,7 +78,7 @@
     }
 
     function replaceIconsWithNames(text) {
-        const iconRegex = /\\{1,2}[iI]\[(\d+)\]/g;
+        var iconRegex = /\\{1,2}[iI]\[(\d+)\]/g;
         return text
             .replace(iconRegex, function (match, iconIndex) {
                 var name = findNameByIconIndex(iconIndex);
@@ -102,8 +102,8 @@
             $dataStates
         ];
 
-        for (const db of databases) {
-            var match = db.find((item) => item != null && item.iconIndex == iconIndex);
+        for (var db of databases) {
+            var match = db.find(function(item) { return item != null && item.iconIndex == iconIndex });
 
             if (match) {
                 return match.name;
@@ -114,7 +114,7 @@
     }
 
     function addToLog(text) {
-        const logContainer = getSrLogElement();
+        var logContainer = getSrLogElement();
         if (logContainer.childElementCount >= maxNumOfLogEntries) {
             // remove the last log entry
             logContainer.removeChild(logContainer.childNodes.item(logContainer.childElementCount - 1));
@@ -124,14 +124,14 @@
             return; // duplicate log, possibly caused by override hierarchy
         }
 
-        const entry = document.createElement('div');
+        var entry = document.createElement('div');
         entry.innerText = text;
-        logContainer.prepend(entry);
+        logContainer.insertBefore(entry, logContainer.firstChild);
         lastLogMessage = text;
     }
 
     function setTextTo(message) {
-        const formattedMessage = sanitizeForScreenReader(message);
+        var formattedMessage = sanitizeForScreenReader(message);
         getSrElement().innerText = "";
         getSrElement().innerText = formattedMessage;
         addToLog(formattedMessage);
@@ -141,7 +141,7 @@
 
     // an object containing the original functions
     // used in the override functions to call the underlying code
-    const overrides = {
+    var overrides = {
         Window_Message_startMessage: Window_Message.prototype.startMessage,
         Window_ScrollText_startMessage: Window_ScrollText.prototype.startMessage,
         Window_Command_select: Window_Command.prototype.select,
@@ -164,16 +164,16 @@
 
     Window_Message.prototype.startMessage = function() {
         overrides.Window_Message_startMessage.call(this);
-        const allText = $gameMessage.allText();
-        let output = this.convertEscapeCharacters(allText);
+        var allText = $gameMessage.allText();
+        var output = this.convertEscapeCharacters(allText);
         // in Yanfly message windows, name is separate
         if (typeof Yanfly !== 'undefined' && Yanfly && typeof Yanfly.nameWindow !== 'undefined' && Yanfly.nameWindow && 
                 typeof this.hasDifferentNameBoxText !== 'undefined' && this.hasDifferentNameBoxText()) {
             // the _text indicates that it should be private/internal, however, there's no public field for the text, so we'll take it
-            const name = sanitizeNameBoxText(Yanfly.nameWindow._text);
+            var name = sanitizeNameBoxText(Yanfly.nameWindow._text);
             output = `${name}: ${output}`;
         } else if ($gameMessage.faceName()) {
-            var actorWithFace = $dataActors.find((a) => a != null && a.faceName == $gameMessage.faceName());
+            var actorWithFace = $dataActors.find(function(a) { return a != null && a.faceName == $gameMessage.faceName() });
             var faceText = (actorWithFace) ? actorWithFace.name : $gameMessage.faceName();
             output = `${faceText}: ${output}`;
         }
@@ -183,8 +183,8 @@
 
     Window_ScrollText.prototype.startMessage = function() {
         overrides.Window_ScrollText_startMessage.call(this);
-        const allText = $gameMessage.allText();
-        const output = this.convertEscapeCharacters(allText);
+        var allText = $gameMessage.allText();
+        var output = this.convertEscapeCharacters(allText);
         setTextTo(output);
     }
 
@@ -241,10 +241,10 @@
 
     Window_ItemList.prototype.select = function(index) {
         overrides.Window_ItemList_select.call(this, index);
-        const item = this.item();
+        var item = this.item();
 
         if (item) {
-            const output = `${item.name} 
+            var output = `${item.name} 
                 ${this.needsNumber() ? ": " + $gameParty.numItems(item) : ""}. 
                 ${item.description ? replaceIconsWithNames(item.description) : ""}`;
             setTextTo(output);
@@ -254,10 +254,10 @@
     Window_ShopBuy.prototype.select = function(index) {
         overrides.Window_ShopBuy_select.call(this, index);
         // seems to be a bug in the implementation of ShopBuy.item where it doesn't check for valid index
-        const item = this._data && index >= 0 ? this.item() : null;
+        var item = this._data && index >= 0 ? this.item() : null;
 
         if (item) {
-            const output = `${item.name}, 
+            var output = `${item.name}, 
                 ${this.price(item)} ${TextManager.currencyUnit}, 
                 ${this.isCurrentItemEnabled() ? "" : "unavailable, "}
                 ${item.description ? replaceIconsWithNames(item.description) : ""}`;
@@ -267,10 +267,10 @@
 
     Window_ShopNumber.prototype.changeNumber = function(amount) {
         overrides.Window_ShopNumber_changeNumber.call(this, amount);
-        const number = this.number();
+        var number = this.number();
 
         if (number >= 0) {
-            const output = `${number}, 
+            var output = `${number}, 
                 ${this._price * number} ${TextManager.currencyUnit}`;
             setTextTo(output);
         }
@@ -313,7 +313,7 @@
             // state text suppressed
             Window_BattleLog.prototype.displayCurrentState = function(subject) {
                 overrides.Window_BattleLog_displayCurrentState.call(this, subject);
-                const stateText = subject.mostImportantStateText();
+                var stateText = subject.mostImportantStateText();
                 if (stateText) {
                     setTextTo(subject.name() + stateText);
                 }
@@ -321,8 +321,8 @@
 
             Window_BattleLog.prototype.displayAddedStates = function(target) {
                 overrides.Window_BattleLog_displayAddedStates.call(this, target);
-                target.result().addedStateObjects().forEach((state) => {
-                    const stateMsg = target.isActor() ? state.message1 : state.message2;
+                target.result().addedStateObjects().forEach(function(state) {
+                    var stateMsg = target.isActor() ? state.message1 : state.message2;
                     if (stateMsg) {
                         setTextTo(target.name() + stateMsg);
                     }
