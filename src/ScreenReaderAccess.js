@@ -345,6 +345,14 @@
     if (document) {
         createSrAnnounceElement();
         createSrLogElement();
+
+        if (process.versions.chromium) {
+            var majorVersionRegex = /^\d+/;
+            var majorVersion = parseInt(process.versions.chromium.match(majorVersionRegex));
+            if (majorVersion < 65) {
+                addToLog(`Warning: The game you are playing is built using an old version of Chromium, ${process.versions.chromium}, which is less than the recommended version, 65. You may face degraded or no support from the screen reader access plugin.`);
+            }
+        }
     } else {
         console.log("Unable to create sr-only elements: Cannot find document.");
     }
