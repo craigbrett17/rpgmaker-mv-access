@@ -276,66 +276,80 @@
         }
     }
 
-    if (typeof Imported !== 'undefined' && Imported && Imported.YEP_BattleEngineCore) {
-        // Yanfly's BattleEngineCore allows people to turn off the BattleLog text changes that explain what's happened in a battle
-        // which is great visually (I think), but we need that info, so we'll re-implement it here, but only output it to screen readers (if set)
-        if (!Yanfly.Param.BECShowHpText) {
-            // hp text suppressed
-            Window_BattleLog.prototype.displayHpDamage = function(target) {
-                overrides.Window_BattleLog_displayHpDamage.call(this, target);
-                if (target.result().hpAffected) {
-                    setTextTo(this.makeHpDamageText(target));
-                }
-            }
-        }
+    if (typeof Yanfly !== 'undefined' && typeof Imported !== 'undefined' && Imported) {
+        // Yanfly overrides
 
-        if (!Yanfly.Param.BECShowMpText) {
-            // mp text suppressed
-            Window_BattleLog.prototype.displayMpDamage = function(target) {
-                overrides.Window_BattleLog_displayMpDamage.call(this, target);
-                if (target.isAlive() && target.result().mpDamage !== 0) {
-                    setTextTo(this.makeMpDamageText(target));
-                }
-            }
-        }
-
-        if (!Yanfly.Param.BECShowTpText) {
-            // tp text suppressed
-            Window_BattleLog.prototype.displayTpDamage = function(target) {
-                overrides.Window_BattleLog_displayTpDamage.call(this, target);
-                if (target.isAlive() && target.result().tpDamage !== 0) {
-                    setTextTo(this.makeTpDamageText(target));
-                }
-            }
-        }
-
-        if (!Yanfly.Param.BECShowStateText) {
-            // state text suppressed
-            Window_BattleLog.prototype.displayCurrentState = function(subject) {
-                overrides.Window_BattleLog_displayCurrentState.call(this, subject);
-                var stateText = subject.mostImportantStateText();
-                if (stateText) {
-                    setTextTo(subject.name() + stateText);
-                }
-            }
-
-            Window_BattleLog.prototype.displayAddedStates = function(target) {
-                overrides.Window_BattleLog_displayAddedStates.call(this, target);
-                target.result().addedStateObjects().forEach(function(state) {
-                    var stateMsg = target.isActor() ? state.message1 : state.message2;
-                    if (stateMsg) {
-                        setTextTo(target.name() + stateMsg);
+        if (Imported.YEP_BattleEngineCore) {
+            // Yanfly's BattleEngineCore allows people to turn off the BattleLog text changes that explain what's happened in a battle
+            // which is great visually (I think), but we need that info, so we'll re-implement it here, but only output it to screen readers (if set)
+            if (!Yanfly.Param.BECShowHpText) {
+                // hp text suppressed
+                Window_BattleLog.prototype.displayHpDamage = function (target) {
+                    overrides.Window_BattleLog_displayHpDamage.call(this, target);
+                    if (target.result().hpAffected) {
+                        setTextTo(this.makeHpDamageText(target));
                     }
-                }, this);
+                }
             }
 
-            Window_BattleLog.prototype.displayRemovedStates = function(target) {
-                overrides.Window_BattleLog_displayRemovedStates.call(this, target);
-                target.result().removedStateObjects().forEach(function(state) {
-                    if (state.message4) {
-                        setTextTo(target.name() + state.message4);
+            if (!Yanfly.Param.BECShowMpText) {
+                // mp text suppressed
+                Window_BattleLog.prototype.displayMpDamage = function (target) {
+                    overrides.Window_BattleLog_displayMpDamage.call(this, target);
+                    if (target.isAlive() && target.result().mpDamage !== 0) {
+                        setTextTo(this.makeMpDamageText(target));
                     }
-                }, this);
+                }
+            }
+
+            if (!Yanfly.Param.BECShowTpText) {
+                // tp text suppressed
+                Window_BattleLog.prototype.displayTpDamage = function (target) {
+                    overrides.Window_BattleLog_displayTpDamage.call(this, target);
+                    if (target.isAlive() && target.result().tpDamage !== 0) {
+                        setTextTo(this.makeTpDamageText(target));
+                    }
+                }
+            }
+
+            if (!Yanfly.Param.BECShowStateText) {
+                // state text suppressed
+                Window_BattleLog.prototype.displayCurrentState = function (subject) {
+                    overrides.Window_BattleLog_displayCurrentState.call(this, subject);
+                    var stateText = subject.mostImportantStateText();
+                    if (stateText) {
+                        setTextTo(subject.name() + stateText);
+                    }
+                }
+
+                Window_BattleLog.prototype.displayAddedStates = function (target) {
+                    overrides.Window_BattleLog_displayAddedStates.call(this, target);
+                    target.result().addedStateObjects().forEach(function (state) {
+                        var stateMsg = target.isActor() ? state.message1 : state.message2;
+                        if (stateMsg) {
+                            setTextTo(target.name() + stateMsg);
+                        }
+                    }, this);
+                }
+
+                Window_BattleLog.prototype.displayRemovedStates = function (target) {
+                    overrides.Window_BattleLog_displayRemovedStates.call(this, target);
+                    target.result().removedStateObjects().forEach(function (state) {
+                        if (state.message4) {
+                            setTextTo(target.name() + state.message4);
+                        }
+                    }, this);
+                }
+            }
+        }
+
+        if (Imported.YEP_GabWindow) {
+            var originalDrawText = Window_Gab.prototype.drawGabText;
+            Window_Gab.prototype.drawGabText = function () {
+                originalDrawText.call(this);
+                if (this._text && this._text.length > 0) {
+                    setTextTo(this._text);
+                }
             }
         }
     }
