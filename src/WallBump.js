@@ -5,14 +5,22 @@
  */
 
 (function() {
+    var soundDelay = 300;
+    var pauseSound = false;
+    
     var overrides = {
         Game_Player_moveStraight: Game_Player.prototype.moveStraight
     };
 
-    // override the moveStraight to check canPass. If cannot pass, play the sound
+    // override the moveStraight to check if the player canPass. If cannot pass, play the sound
     Game_Player.prototype.moveStraight = function(d) {
-        if (!this.canPass(this.x, this.y, d)) {
+        if (!pauseSound && !this.canPass(this.x, this.y, d)) {
             SoundManager.playCancel ();
+            pauseSound = true;
+
+            setTimeout(() => {
+                pauseSound = false;
+            }, soundDelay);
         }
 
         overrides.Game_Player_moveStraight.call(this, d);
