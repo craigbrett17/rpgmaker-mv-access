@@ -7,6 +7,7 @@
 (function() {
     var soundDelay = 300;
     var pauseSound = false;
+    var wallBumpSound = { name: "Earth3", pan: 0, pitch: 100, volume: 30 };
     
     var overrides = {
         Game_Player_moveStraight: Game_Player.prototype.moveStraight
@@ -15,7 +16,7 @@
     // override the moveStraight to check if the player canPass. If cannot pass, play the sound
     Game_Player.prototype.moveStraight = function(d) {
         if (!pauseSound && !this.canPass(this.x, this.y, d)) {
-            SoundManager.playCancel ();
+            AudioManager.playStaticSe(wallBumpSound);
             pauseSound = true;
 
             setTimeout(() => {
