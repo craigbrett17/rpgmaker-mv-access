@@ -5,7 +5,7 @@
  */
 
 (function() {
-    var soundDelay = 300;
+    var soundDelay = 500;
     var pauseSound = false;
     var wallBumpSound = { name: "Earth3", pan: 0, pitch: 100, volume: 30 };
     
