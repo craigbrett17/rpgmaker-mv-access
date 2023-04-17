@@ -144,6 +144,7 @@
     var overrides = {
         Window_Message_startMessage: Window_Message.prototype.startMessage,
         Window_ScrollText_startMessage: Window_ScrollText.prototype.startMessage,
+        Window_MapName_open: Window_MapName.prototype.open,
         Window_Command_select: Window_Command.prototype.select,
         Window_SkillList_select: Window_SkillList.prototype.select,
         Window_Options_select: Window_Options.prototype.select,
@@ -186,6 +187,13 @@
         var allText = $gameMessage.allText();
         var output = this.convertEscapeCharacters(allText);
         setTextTo(output);
+    }
+
+    Window_MapName.prototype.open = function() {
+        overrides.Window_MapName_open.call(this);
+        if ($gameMap.displayName()) {
+            setTextTo($gameMap.displayName());
+        }
     }
 
     Window_Command.prototype.select = function(index) {
