@@ -35,8 +35,16 @@
     }
 
     function isBumpingInteractable(x, y, d) {
-        const x2 = $gameMap.roundXWithDirection(x, d);
-        const y2 = $gameMap.roundYWithDirection(y, d);
+        let x2 = $gameMap.roundXWithDirection(x, d);
+        let y2 = $gameMap.roundYWithDirection(y, d);
+        const targetIsCounter = $gameMap.isCounter(x2, y2);
+
+        if (targetIsCounter) {
+            // increment by another tile to account for the counter
+            x2 = $gameMap.roundXWithDirection(x2, d);
+            y2 = $gameMap.roundYWithDirection(y2, d);
+        }
+
         const events = $gameMap.eventsXy(x2, y2);
         for (const event of events) {
             if (event.isTriggerIn([0, 2])) { // "Touch" or "Player Touch"
