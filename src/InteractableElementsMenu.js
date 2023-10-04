@@ -79,13 +79,24 @@
 
         // sortby id
         interactableElements.sort(function (a, b) {
-            return a.id - b.id;
+            return a._eventId - b._eventId;
         });
 
         for (var i = 0; i < interactableElements.length; i++) {
           var element = interactableElements[i];
-          var name = (element.name) ? element.name : "Event " + i + " at " + element.x + " " + element.y;
-          this.addCommand(name, element.id, true, element);
+          var elementProjection = {
+            x: element.x,
+            y: element.y,
+            name: element._name,
+            id: element._eventId,
+            characterName: element._characterName
+          };
+          var name = (elementProjection.name)
+            ? elementProjection.name
+            : (elementProjection.characterName && elementProjection.characterName != "")
+                ? "Event " + i + " " + elementProjection.characterName + " at " + element.x + " " + element.y
+                : "Event " + i + " at " + element.x + " " + element.y;
+          this.addCommand(name, elementProjection.id, true, elementProjection);
         }
 
         if (this._list.length === 0) {
@@ -102,7 +113,12 @@
       };
       
       Window_InteractableElementsMenu.prototype.processOk = function() {
-        SoundManager.playCancel();
+        var element = this._list[this.index()].ext;
+        var x = element.x;
+        var y = element.y;
+        var script = "this.character(0).moveTo(" + x + ", " + y + ");";
+        $gameTemp.reserveCommonEvent({ list: [{ code: 205, indent: 0, parameters: [0, { list: [{ code: 45, parameters: [script], indent: 0 }], repeat: false, skippable: true, wait: false }] }], name: "", switchId: 0 });
+        SoundManager.playOk();
         SceneManager.pop();
       };
       
