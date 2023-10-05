@@ -12,16 +12,28 @@
 (function () {
     var parameters = PluginManager.parameters('InteractableElementsMenu');
     var triggerKey = parameters['Trigger Key'];
+    var isKeyPressed = false;
+    var currentPosX = 0, currentPosY = 0;
+    var trackingTarget = null;
     
     var _Scene_Map_update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function () {
         _Scene_Map_update.call(this);
         if (this.isInteractableElementsMenuTriggered()) {
-            SceneManager.push(Scene_InteractableElementsMenu);
+            if (trackingTarget) {
+                trackingTarget = null;
+                SoundManager.playCancel();
+                resetBgm();
+            } else {
+                SceneManager.push(Scene_InteractableElementsMenu);
+            }
+        }
+
+        if (trackingTarget) {
+            // calculate panning and pitch for the tracking sound based on player's position relative to the target
+            updateTrackingSound(trackingTarget);
         }
     };
-
-    var isKeyPressed = false;
 
     document.addEventListener('keypress', function(event) {
         if (event.keyCode === triggerKey) {
@@ -114,10 +126,9 @@
       
       Window_InteractableElementsMenu.prototype.processOk = function() {
         var element = this._list[this.index()].ext;
-        var x = element.x;
-        var y = element.y;
-        var script = "this.character(0).moveTo(" + x + ", " + y + ");";
-        $gameTemp.reserveCommonEvent({ list: [{ code: 205, indent: 0, parameters: [0, { list: [{ code: 45, parameters: [script], indent: 0 }], repeat: false, skippable: true, wait: false }] }], name: "", switchId: 0 });
+        if (!element) return;
+        
+        trackingTarget = element;
         SoundManager.playOk();
         SceneManager.pop();
       };
@@ -126,6 +137,55 @@
         SoundManager.playCancel();
         SceneManager.pop();
     };
+
+    function updateTrackingSound() {
+        var player = $gamePlayer;
+        if (player.x === currentPosX && player.y === currentPosY) {
+            return;
+        }
+        currentPosX = player.x;
+        currentPosY = player.y;
+
+        var target = trackingTarget;
+        var dx = player.x - target.x;
+        var dy = player.y - target.y;
+        var pan = 0;
+        var pitch = 100;
+    
+        if (dx < 0) {
+            pan = 100;
+        } else if (dx > 0) {
+            pan = -100;
+        }
+    
+        if (dy < 0) {
+            pitch = 120;
+        } else if (dy > 0) {
+            pitch = 80;
+        }
+    
+        var currentBgm = AudioManager.saveBgm();
+        if (currentBgm && currentBgm.name) {
+            AudioManager.updateBgmParameters({
+                name: currentBgm.name,
+                pan: pan,
+                pitch: pitch,
+                volume: currentBgm.volume
+            });
+        }
+    }
+    
+    function resetBgm() {
+        var currentBgm = AudioManager.saveBgm();
+        if (currentBgm && currentBgm.name) {
+            AudioManager.updateBgmParameters({
+                name: currentBgm.name,
+                pan: 0,
+                pitch: 100,
+                volume: currentBgm.volume
+            });
+        }
+    }
 
     Game_Map.prototype.interactableElements = function () {
         return this.events().filter(function (event) {
