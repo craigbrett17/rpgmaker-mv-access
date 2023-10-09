@@ -96,23 +96,13 @@
 
         for (var i = 0; i < interactableElements.length; i++) {
           var element = interactableElements[i];
-          var elementProjection = {
-            x: element.x,
-            y: element.y,
-            name: element._name,
-            id: element._eventId,
-            characterName: element._characterName
-          };
-          var name = (elementProjection.name)
-            ? elementProjection.name
-            : (elementProjection.characterName && elementProjection.characterName != "")
-                ? "Event " + i + " " + elementProjection.characterName + " at " + element.x + " " + element.y
-                : "Event " + i + " at " + element.x + " " + element.y;
-          this.addCommand(name, elementProjection.id, true, elementProjection);
+          this.createCommandFromInteractableElement(element);
         }
 
         if (this._list.length === 0) {
             this.addCommand("No interactable elements", null, false);
+        } else {
+            this.addCommand("Only show elements with a name", "", true, { filter: "characterName" });
         }
       };
       
@@ -127,7 +117,37 @@
       Window_InteractableElementsMenu.prototype.processOk = function() {
         var element = this._list[this.index()].ext;
         if (!element) return;
-        
+
+        if (element.filter) {
+            // get the current filter
+            var currentFilter = element.filter;
+
+            // get the list of interactable elements
+            var interactableElements = $gameMap.interactableElements();
+
+            if (currentFilter === "characterName") {
+                // update the items to be the interactable elements with a character name
+                interactableElements = interactableElements.filter(function (element) {
+                    return element._characterName && element._characterName != "";
+                });
+                this.clearCommandList();
+                // loop through the interactable elements and add them as commands
+                for (var i = 0; i < interactableElements.length; i++) {
+                    var element = interactableElements[i];
+                    this.createCommandFromInteractableElement(element);
+                }
+
+                if (this._list.length === 0) {
+                    this.addCommand("No interactable elements", null, false);
+                }
+
+                this.select(0);
+            }
+
+            SoundManager.playOk();
+            return;
+        }
+
         trackingTarget = element;
         SoundManager.playOk();
         SceneManager.pop();
@@ -137,6 +157,22 @@
         SoundManager.playCancel();
         SceneManager.pop();
     };
+
+    Window_InteractableElementsMenu.prototype.createCommandFromInteractableElement = function(element) {
+        var elementProjection = {
+            x: element.x,
+            y: element.y,
+            name: element._name,
+            id: element._eventId,
+            characterName: element._characterName
+        };
+        var name = (elementProjection.name)
+            ? elementProjection.name
+            : (elementProjection.characterName && elementProjection.characterName != "")
+                ? "Event " + elementProjection.id + " " + elementProjection.characterName + " at " + element.x + " " + element.y
+                : "Event " + elementProjection.id + " at " + element.x + " " + element.y;
+        this.addCommand(name, elementProjection.id, true, elementProjection);
+    }
 
     function updateTrackingSound() {
         var player = $gamePlayer;
