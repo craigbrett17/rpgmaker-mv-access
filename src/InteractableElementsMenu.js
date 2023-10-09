@@ -83,6 +83,7 @@
       
       Window_InteractableElementsMenu.prototype.initialize = function() {
         Window_Command.prototype.initialize.call(this, 0, 0);
+        this.filter = "";
         this.select(0);
       };
 
@@ -98,6 +99,13 @@
             return a._eventId - b._eventId;
         });
 
+        if (this.filter === "characterName") {
+            // update the items to be the interactable elements with a character name
+            interactableElements = interactableElements.filter(function (element) {
+                return element._characterName && element._characterName != "";
+            });
+        }
+
         for (var i = 0; i < interactableElements.length; i++) {
           var element = interactableElements[i];
           this.createCommandFromInteractableElement(element);
@@ -105,6 +113,8 @@
 
         if (this._list.length === 0) {
             this.addCommand("No interactable elements", null, false);
+        } else if (this.filter != "") {
+            this.addCommand("Show all elements", "", true, { filter: "" });
         } else {
             this.addCommand("Only show elements with a name", "", true, { filter: "characterName" });
         }
@@ -122,32 +132,12 @@
         var element = this._list[this.index()].ext;
         if (!element) return;
 
-        if (element.filter) {
+        if (element.filter != undefined) {
             // get the current filter
             var currentFilter = element.filter;
-
-            // get the list of interactable elements
-            var interactableElements = $gameMap.interactableElements();
-
-            if (currentFilter === "characterName") {
-                // update the items to be the interactable elements with a character name
-                interactableElements = interactableElements.filter(function (element) {
-                    return element._characterName && element._characterName != "";
-                });
-                this.clearCommandList();
-                // loop through the interactable elements and add them as commands
-                for (var i = 0; i < interactableElements.length; i++) {
-                    var element = interactableElements[i];
-                    this.createCommandFromInteractableElement(element);
-                }
-
-                if (this._list.length === 0) {
-                    this.addCommand("No interactable elements", null, false);
-                }
-
-                this.select(0);
-            }
-
+            this.filter = currentFilter;
+            this.refresh();
+            this.select(0);
             SoundManager.playOk();
             return;
         }
