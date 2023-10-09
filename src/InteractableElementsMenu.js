@@ -85,7 +85,11 @@
         Window_Command.prototype.initialize.call(this, 0, 0);
         this.select(0);
       };
-      
+
+      Window_InteractableElementsMenu.prototype.numVisibleRows = function() {
+        return 10;
+    };
+
       Window_InteractableElementsMenu.prototype.makeCommandList = function() {
         var interactableElements = $gameMap.interactableElements();
 
