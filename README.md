@@ -6,6 +6,7 @@ A series (eventually) of RPGMaker MV plugins to improve the accessibility of RPG
 
 * ScreenReaderAccess: Interacts between a user's screen reader and RPGMaker games, reading out textual information (dialog, battle changes, menus)
 * WallBump: When moving around on the map, will make a small bump noise when a player attempts to walk anywhere that they are not allowed to walk.
+* InteractableElementsMenu: Allows the player to press a hotkey to bring up a menu of interactable elements on the map to then choose one to be guided to.
 
 ### ScreenReaderAccess
 
@@ -17,7 +18,21 @@ Note: This plugin, as it makes use of the aria-live attribute for it to function
 
 A pretty simple plugin that reacts to the player character walking. If the player character tries to walk somewhere that they are not supposed to walk (i.e a wall, water, etc), it will make a small noise to signify that this is impossible, so that a blind or visually impaired player knows that they will not progress this way.
 
-So far, the noise is set to the cancel noise, but hopefully this will be configurable soon.
+So far, the noise is set to a specific noise, but hopefully this will be configurable soon.
+
+### InteractableElementsMenu
+
+Allows a player to press a hotkey to bring up a list of interactable elements on the map. It will display their coordinates and if the player selects that element, the pitch and pan of the music will guide the player towards that item. 
+
+* Music coming out from the left: Target is to the left
+* Music coming out from the right: Target is to the right
+* Music is higher pitched: Item is above you
+* Music is lower pitched: Item is below you
+* Exiting out from this menu without selecting anything will reset the music
+
+The hotkey is configurable as the parameter "Trigger Key". This will need to be a keycode.
+
+Naturally, this will not work in its current form on maps with no music.
 
 ## How to use
 
