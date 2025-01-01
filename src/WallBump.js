@@ -17,7 +17,13 @@
 (function() {
     var parameters = PluginManager.parameters('WallBump');
     var wallBumpSoundName = parameters['wallBumpSound'];
+    if (!wallBumpSoundName) {
+        wallBumpSoundName = 'Earth3';
+    }
     var interactSoundName = parameters['interactSound'];
+    if (!interactSoundName) {
+        interactSoundName = 'Saint5';
+    }
     var wallBumpSound = { name: wallBumpSoundName, pan: 0, pitch: 100, volume: 30 };
     var interactSound = { name: interactSoundName, pan: 0, pitch: 100, volume: 30 };
 
