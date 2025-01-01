@@ -2,14 +2,28 @@
  * WallBump sound plugin
  * Makes a wall bump noise when your character tries to pass through impassable terrain
  * Author: Craig Brett
+ * 
+ * @param wallBumpSound
+ * @desc The sound to play when the player bumps into a wall
+ * @type text
+ * @default Earth3
+ * 
+ * @param interactSound
+ * @desc The sound to play when the player bumps into an interactable element
+ * @type text
+ * @default Saint5
  */
 
 (function() {
+    var parameters = PluginManager.parameters('WallBump');
+    var wallBumpSoundName = parameters['wallBumpSound'];
+    var interactSoundName = parameters['interactSound'];
+    var wallBumpSound = { name: wallBumpSoundName, pan: 0, pitch: 100, volume: 30 };
+    var interactSound = { name: interactSoundName, pan: 0, pitch: 100, volume: 30 };
+
     var soundDelay = 500;
     var pauseSound = false;
-    var wallBumpSound = { name: "Earth3", pan: 0, pitch: 100, volume: 30 };
-    var interactSound = { name: "Saint5", pan: 0, pitch: 100, volume: 30 };
-    
+
     var overrides = {
         Game_Player_moveStraight: Game_Player.prototype.moveStraight
     };
@@ -23,7 +37,7 @@
             } else {
                 AudioManager.playStaticSe(wallBumpSound);
             }
-            
+
             pauseSound = true;
 
             setTimeout(() => {

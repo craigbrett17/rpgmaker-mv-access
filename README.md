@@ -18,7 +18,7 @@ Note: This plugin, as it makes use of the aria-live attribute for it to function
 
 A pretty simple plugin that reacts to the player character walking. If the player character tries to walk somewhere that they are not supposed to walk (i.e a wall, water, etc), it will make a small noise to signify that this is impossible, so that a blind or visually impaired player knows that they will not progress this way.
 
-So far, the noise is set to a specific noise, but hopefully this will be configurable soon.
+This is configurable with the parameters wallBumpSound (for the noise of hitting something impassable but non-interactive) and interactSoundName (for when the player encounters something that could potentially be interactable)
 
 ### InteractableElementsMenu
 
