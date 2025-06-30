@@ -181,12 +181,22 @@
             id: element._eventId,
             characterName: element._characterName
         };
-        var name = (elementProjection.name)
-            ? elementProjection.name
-            : (elementProjection.characterName && elementProjection.characterName != "")
-                ? "Event " + elementProjection.id + " " + elementProjection.characterName + " at " + element.x + " " + element.y
-                : "Event " + elementProjection.id + " at " + element.x + " " + element.y;
-        this.addCommand(name, elementProjection.id, true, elementProjection);
+
+        var dx = element.x - $gamePlayer.x;
+        var dy = element.y - $gamePlayer.y;
+
+        var directions = [];
+        if (dy < 0) directions.push(Math.abs(dy) + " up");
+        if (dy > 0) directions.push(dy + " down");
+        if (dx < 0) directions.push(Math.abs(dx) + " left");
+        if (dx > 0) directions.push(dx + " right");
+
+        var relativeText = directions.length > 0 ? " (" + directions.join(" and ") + ")" : "";
+
+        var name = elementProjection.name ||
+            (elementProjection.characterName ? "Event " + elementProjection.id + " " + elementProjection.characterName : "Event " + elementProjection.id);
+
+        this.addCommand(name + " at " + element.x + ", " + element.y + relativeText, elementProjection.id, true, elementProjection);
     }
 
     function updateTrackingSound() {
