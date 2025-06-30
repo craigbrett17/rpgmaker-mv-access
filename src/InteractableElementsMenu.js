@@ -11,11 +11,11 @@
 
 (function () {
     var parameters = PluginManager.parameters('InteractableElementsMenu');
-    var triggerKey = parameters['Trigger Key'];
+    var triggerKey = parseInt(parameters['Trigger Key']) || 73;
     var isKeyPressed = false;
     var currentPosX = 0, currentPosY = 0;
     var trackingTarget = null;
-    
+
     var _Scene_Map_update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function () {
         _Scene_Map_update.call(this);
@@ -35,13 +35,13 @@
         }
     };
 
-    document.addEventListener('keypress', function(event) {
+    document.addEventListener('keypress', function (event) {
         if (event.keyCode === triggerKey) {
             isKeyPressed = true;
         }
     });
 
-    document.addEventListener('keyup', function(event) {
+    document.addEventListener('keyup', function (event) {
         if (event.keyCode === triggerKey) {
             isKeyPressed = false;
         }
@@ -68,30 +68,47 @@
     };
 
     Scene_InteractableElementsMenu.prototype.createInteractableElementsWindow = function () {
-        // Create a new window to display the interactable elements menu
-        var interactableElementsWindow = new Window_InteractableElementsMenu();
-        interactableElementsWindow.setHandler('cancel', interactableElementsWindow.processCancel.bind(interactableElementsWindow));
-        this.addWindow(interactableElementsWindow);
+        if (Utils.RPGMAKER_NAME === "MV") {
+            var interactableElementsWindow = new Window_InteractableElementsMenu();
+            interactableElementsWindow.setHandler('cancel', interactableElementsWindow.processCancel.bind(interactableElementsWindow));
+            this.addWindow(interactableElementsWindow);
+        } else if (Utils.RPGMAKER_NAME === "MZ") {
+            var rect = new Rectangle(0, 0, 300, 300); // Adjust size as needed
+            var interactableElementsWindow = new Window_InteractableElementsMenu(rect);
+            interactableElementsWindow.setHandler('cancel', interactableElementsWindow.processCancel.bind(interactableElementsWindow));
+            this.addWindow(interactableElementsWindow);
+        }
+    };
+
+    Scene_InteractableElementsMenu.prototype.processCancel = function () {
+        SoundManager.playCancel();
+        SceneManager.pop();
     };
 
     function Window_InteractableElementsMenu() {
         this.initialize.apply(this, arguments);
-      }
-      
-      Window_InteractableElementsMenu.prototype = Object.create(Window_Command.prototype);
-      Window_InteractableElementsMenu.prototype.constructor = Window_InteractableElementsMenu;
-      
-      Window_InteractableElementsMenu.prototype.initialize = function() {
-        Window_Command.prototype.initialize.call(this, 0, 0);
-        this.filter = "";
-        this.select(0);
-      };
+    }
 
-      Window_InteractableElementsMenu.prototype.numVisibleRows = function() {
+    Window_InteractableElementsMenu.prototype = Object.create(Window_Command.prototype);
+    Window_InteractableElementsMenu.prototype.constructor = Window_InteractableElementsMenu;
+
+    Window_InteractableElementsMenu.prototype.initialize = function (rect) {
+        this.filter = "";
+        if (Utils.RPGMAKER_NAME === "MV") {
+            Window_Command.prototype.initialize.call(this, 0, 0);
+            this.select(0);
+        } else if (Utils.RPGMAKER_NAME === "MZ") {
+            Window_Command.prototype.initialize.call(this, rect);
+            this.refresh();
+            this.activate();
+        }
+    };
+
+    Window_InteractableElementsMenu.prototype.numVisibleRows = function () {
         return 10;
     };
 
-      Window_InteractableElementsMenu.prototype.makeCommandList = function() {
+    Window_InteractableElementsMenu.prototype.makeCommandList = function () {
         var interactableElements = $gameMap.interactableElements();
 
         // sortby id
@@ -107,8 +124,8 @@
         }
 
         for (var i = 0; i < interactableElements.length; i++) {
-          var element = interactableElements[i];
-          this.createCommandFromInteractableElement(element);
+            var element = interactableElements[i];
+            this.createCommandFromInteractableElement(element);
         }
 
         if (this._list.length === 0) {
@@ -118,17 +135,17 @@
         } else {
             this.addCommand("Only show elements with a name", "", true, { filter: "characterName" });
         }
-      };
-      
-      Window_InteractableElementsMenu.prototype.drawItem = function(index) {
+    };
+
+    Window_InteractableElementsMenu.prototype.drawItem = function (index) {
         var element = this._list[index];
         if (!element) return;
 
         var rect = this.itemRect(index);
         this.drawText(element.name, rect.x, rect.y, rect.width);
-      };
-      
-      Window_InteractableElementsMenu.prototype.processOk = function() {
+    };
+
+    Window_InteractableElementsMenu.prototype.processOk = function () {
         var element = this._list[this.index()].ext;
         if (!element) return;
 
@@ -145,14 +162,18 @@
         trackingTarget = element;
         SoundManager.playOk();
         SceneManager.pop();
-      };
-      
-      Window_InteractableElementsMenu.prototype.processCancel = function() {
+    };
+
+    Window_InteractableElementsMenu.prototype.processCancel = function () {
+        if (trackingTarget) {
+            trackingTarget = null;
+            resetBgm();
+        }
         SoundManager.playCancel();
         SceneManager.pop();
     };
 
-    Window_InteractableElementsMenu.prototype.createCommandFromInteractableElement = function(element) {
+    Window_InteractableElementsMenu.prototype.createCommandFromInteractableElement = function (element) {
         var elementProjection = {
             x: element.x,
             y: element.y,
@@ -181,19 +202,19 @@
         var dy = player.y - target.y;
         var pan = 0;
         var pitch = 100;
-    
+
         if (dx < 0) {
             pan = 100;
         } else if (dx > 0) {
             pan = -100;
         }
-    
+
         if (dy < 0) {
             pitch = 120;
         } else if (dy > 0) {
             pitch = 80;
         }
-    
+
         var currentBgm = AudioManager.saveBgm();
         if (currentBgm && currentBgm.name) {
             AudioManager.updateBgmParameters({
@@ -204,7 +225,7 @@
             });
         }
     }
-    
+
     function resetBgm() {
         var currentBgm = AudioManager.saveBgm();
         if (currentBgm && currentBgm.name) {
