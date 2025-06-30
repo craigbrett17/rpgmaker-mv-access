@@ -240,7 +240,7 @@
 
     Game_Map.prototype.interactableElements = function () {
         return this.events().filter(function (event) {
-            return event.isInteractable();
+            return event.isInteractable() && event.x > 0 && event.y > 0;
         });
     };
 
